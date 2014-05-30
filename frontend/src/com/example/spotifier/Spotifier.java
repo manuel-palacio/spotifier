@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.widget.Toast;
 import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -40,10 +41,12 @@ public class Spotifier extends Activity {
             }
         }
 
-       // new SpotifyUriTask().execute("Tqi2ky3hirnuhaynztacz7d3mai");
+        // new SpotifyUriTask().execute("Tqi2ky3hirnuhaynztacz7d3mai");
     }
 
     private class SpotifyUriTask extends AsyncTask<String, Void, String> {
+
+        StatusLine statusLine;
 
         @Override
         protected String doInBackground(String... params) {
@@ -60,26 +63,37 @@ public class Spotifier extends Activity {
 
                 HttpResponse response = httpclient.execute(new HttpGet(reqUri.toString()));
 
+                statusLine = response.getStatusLine();
 
-                BufferedReader in = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+                if (statusLine.getStatusCode() == 200) {
+                    BufferedReader in = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 
-                String l;
-                while ((l = in.readLine()) != null) {
-                    sb.append(l);
+                    String l;
+                    while ((l = in.readLine()) != null) {
+                        sb.append(l);
+                    }
+                    in.close();
+                } else {
+                    sb.append(statusLine.getReasonPhrase());
                 }
-                in.close();
+
+
             } catch (IOException e) {
-                showToast("Could not fetch Spotify URL: " + e.getMessage());
+               sb.append(e.getMessage());
             }
+
 
             return sb.toString();
         }
 
         @Override
         protected void onPostExecute(String result) {
-            saveSongUriInClipboard(result);
-
-            showToast("Copied Spotify URL to clipboard");
+            if (statusLine.getStatusCode() == 200) {
+                saveSongUriInClipboard(result);
+                showToast("Copied Spotify URL to clipboard");
+            } else {
+                showToast("Could not fetch Spotify URL: " + result);
+            }
 
             finish();
         }

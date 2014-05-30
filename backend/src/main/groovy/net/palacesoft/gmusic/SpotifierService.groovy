@@ -10,7 +10,7 @@ class SpotifierService {
 
     static def String getSongId(String googleId, String country) {
 
-        String songName = getSongNameFromId(googleId)
+        String songName = getGoogleSongNameFromId(googleId)
 
         log.info("Got song name ${songName}")
         def xml = new XmlSlurper().parse("http://ws.spotify.com/search/1/track?q=${songName}")
@@ -30,7 +30,7 @@ class SpotifierService {
 
     }
 
-    static String getSongNameFromId(String id) {
+    static String getGoogleSongNameFromId(String id) {
         Document doc = Jsoup.connect("https://play.google.com/music/m/${id}").get()
 
         def redirect = doc.select("a").attr("href")
@@ -38,8 +38,6 @@ class SpotifierService {
         log.info("Redirecting to ${redirect}")
 
         doc = Jsoup.connect(redirect).get()
-
-        log.info("Google song doc ${doc.title()}")
 
         def songElement = doc.select("[data-track-docid=song-${id}]").first()
         if (songElement) {
