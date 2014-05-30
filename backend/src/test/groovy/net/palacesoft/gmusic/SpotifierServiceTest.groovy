@@ -13,7 +13,7 @@ class SpotifierServiceTest {
 
 
     @Test(expected = IllegalStateException)
-       public void failed_to_find_song() {
-           assert SpotifierService.getSongId("xe2", "US").length() == 22
-       }
+    public void should_fail_to_find_song() {
+        assert SpotifierService.getSongId("xe2", "US").length() == 22
+    }
 }
