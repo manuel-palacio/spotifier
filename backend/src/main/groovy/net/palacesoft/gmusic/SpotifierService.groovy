@@ -17,15 +17,14 @@ class SpotifierService {
 
         def track = xml.track.find { it.name == songName && it.album.availability.territories.text().contains(country) }
 
+        String uri;
         if (track) {
-            String uri = track.@href.text()
-
-            return StringUtils.substringAfterLast(uri, ":")
+            uri = track.@href.text()
         } else {
-            String uri = xml.track[0].@href.text()
-
-            return StringUtils.substringAfterLast(uri, ":")
+            uri = xml.track[0].@href.text()
         }
+
+        return StringUtils.substringAfterLast(uri, ":")
 
 
     }

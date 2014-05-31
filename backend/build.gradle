@@ -17,8 +17,8 @@ apply plugin: 'spring-boot'
 version =  '0.1.1'
 
 jar {
-    baseName = 'gs-spring-boot'
-    version =  '0.1.0'
+    baseName = 'spotifier-backend'
+    version =  '0.1'
 }
 
 

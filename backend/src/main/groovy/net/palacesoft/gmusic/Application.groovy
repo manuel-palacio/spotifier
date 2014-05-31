@@ -17,9 +17,12 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/resources/spotifier")
 public class Application {
 
+    private Cache cache = new Cache(1000);
+
     @RequestMapping(value = "/{id}")
     @ResponseBody
-    public ResponseEntity<String> getSongUri(@PathVariable String id, @RequestParam(defaultValue = "US") String country) throws IOException {
+    public ResponseEntity<String> getSongUri(
+            @PathVariable String id, @RequestParam(defaultValue = "US") String country) throws IOException {
 
         if (id == null) {
             return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
@@ -27,10 +30,18 @@ public class Application {
 
         String songUri;
         try {
-            songUri = "http://open.spotify.com/track/${SpotifierService.getSongId(id, country.toUpperCase())}"
+            def trackUri = cache.get(id)
+            if (!trackUri) {
+                def songId = SpotifierService.getSongId(id, country.toUpperCase())
+                songUri = "http://open.spotify.com/track/${songId}"
+                cache.put(id, songUri);
+            } else {
+                songUri = trackUri
+            }
+
         } catch (IllegalStateException e) {
             return new ResponseEntity<String>(e.getMessage(), HttpStatus.NOT_FOUND);
-        } catch (Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<String>(songUri, HttpStatus.OK);
