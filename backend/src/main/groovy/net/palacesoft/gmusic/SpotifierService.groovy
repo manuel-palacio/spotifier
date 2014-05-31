@@ -10,7 +10,7 @@ class SpotifierService {
 
     static def String getSongId(String googleId, String country) {
 
-        String songName = getGoogleSongNameFromId(googleId)
+        String songName = URLEncoder.encode(getGoogleSongNameFromId(googleId), "UTF-8")
 
         log.info("Got song name ${songName}")
         def xml = new XmlSlurper().parse("http://ws.spotify.com/search/1/track?q=${songName}")
@@ -31,6 +31,8 @@ class SpotifierService {
     }
 
     static String getGoogleSongNameFromId(String id) {
+        log.info("Finding song ${id}")
+
         Document doc = Jsoup.connect("https://play.google.com/music/m/${id}").get()
 
         def redirect = doc.select("a").attr("href")

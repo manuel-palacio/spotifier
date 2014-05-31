@@ -1,4 +1,4 @@
-package com.example.spotifier;
+package net.palacesoft.spotifier;
 
 import android.app.Activity;
 import android.content.ClipData;
