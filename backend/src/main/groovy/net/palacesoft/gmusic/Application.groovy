@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/resources/spotifier")
 public class Application {
 
-    private Cache cache = new Cache(1000);
+    private def cache = [ removeEldestEntry: { size() > 1000 } ] as LinkedHashMap
 
     @RequestMapping(value = "/{id}")
     @ResponseBody
