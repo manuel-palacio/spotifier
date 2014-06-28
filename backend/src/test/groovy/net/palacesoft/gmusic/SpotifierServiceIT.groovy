@@ -3,7 +3,7 @@ package net.palacesoft.gmusic
 import org.junit.Test
 
 
-class SpotifierServiceTest {
+class SpotifierServiceIT {
 
     @Test
     public void should_find_song() {
