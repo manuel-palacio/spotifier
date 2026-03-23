@@ -8,7 +8,6 @@ import java.util.Collections
 
 private val VIDEO_ID_REGEX = Regex("^[A-Za-z0-9_\\-]{11}$")
 
-/** Thread-safe LRU cache: videoId -> Spotify URL */
 private val cache: MutableMap<String, String> = Collections.synchronizedMap(
     object : LinkedHashMap<String, String>(1000, 0.75f, true) {
         override fun removeEldestEntry(eldest: Map.Entry<String, String>) = size > 1000
@@ -34,8 +33,7 @@ fun Application.configureRoutes(youtube: YoutubeService, spotify: SpotifyService
             }
 
             try {
-                val (track, artist, rawTitle) = youtube.getTrackAndArtist(videoId)
-                val spotifyUrl = spotify.findTrackUrl(track, artist, rawTitle)
+                val spotifyUrl = resolveSpotifyUrl(videoId, youtube, spotify)
                     ?: run {
                         call.respond(HttpStatusCode.NotFound, "No matching track found on Spotify")
                         return@get
@@ -48,4 +46,13 @@ fun Application.configureRoutes(youtube: YoutubeService, spotify: SpotifyService
             }
         }
     }
+}
+
+private fun resolveSpotifyUrl(
+    videoId: String,
+    youtube: YoutubeService,
+    spotify: SpotifyService
+): String? {
+    val (track, artist, rawTitle) = youtube.getTrackAndArtist(videoId)
+    return spotify.findTrackUrl(track, artist, rawTitle)
 }
