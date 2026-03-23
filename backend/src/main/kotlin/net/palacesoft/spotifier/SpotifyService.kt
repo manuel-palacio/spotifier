@@ -6,6 +6,7 @@ import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import java.time.Instant
 import java.util.concurrent.TimeUnit
 
@@ -18,20 +19,17 @@ open class SpotifyService(
         .readTimeout(10, TimeUnit.SECONDS)
         .build()
 
-    @Volatile private var token: String = ""
-    @Volatile private var tokenExpiresAt: Instant = Instant.EPOCH
+    private val tokenLock = Any()
+    private var token: String = ""
+    private var tokenExpiresAt: Instant = Instant.EPOCH
 
-    /**
-     * Returns Spotify track URL or null if not found. Throws on upstream error.
-     * [rawTitle] is used as a free-text fallback query when both track and artist are blank (Fallback 2).
-     */
     open fun findTrackUrl(track: String, artist: String, rawTitle: String = ""): String? {
         val query = buildQuery(track, artist, rawTitle)
         if (query.isBlank()) return null
-        val encodedQuery = URLEncoder.encode(query, "UTF-8")
+        val encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8)
         val url = "https://api.spotify.com/v1/search?q=$encodedQuery&type=track&limit=1"
-        val response = executeWithToken(url)
-        val items = JsonParser.parseString(response)
+        val responseBody = executeWithFreshToken(url)
+        val items = JsonParser.parseString(responseBody)
             .asJsonObject
             .getAsJsonObject("tracks")
             .getAsJsonArray("items")
@@ -45,41 +43,56 @@ open class SpotifyService(
         track.isNotBlank() && artist.isNotBlank() -> "track:$track artist:$artist"
         track.isNotBlank() -> track
         artist.isNotBlank() -> artist
-        rawTitle.isNotBlank() -> rawTitle  // Fallback 2: free-text search
+        rawTitle.isNotBlank() -> rawTitle
         else -> ""
     }
 
-    private fun executeWithToken(url: String): String {
-        ensureValidToken()
-        val request = Request.Builder().url(url)
-            .header("Authorization", "Bearer $token").build()
-        val response = client.newCall(request).execute()
-        // On 401, force-refresh and retry once
+    private fun executeWithFreshToken(url: String): String {
+        val accessToken = validToken()
+        val response = client.newCall(requestWithToken(url, accessToken)).execute()
         if (response.code == 401) {
             response.close()
-            refreshToken()
-            val retry = Request.Builder().url(url)
-                .header("Authorization", "Bearer $token").build()
-            return client.newCall(retry).execute().use { it.body?.string() ?: "" }
+            val refreshedToken = forceRefreshToken()
+            return client.newCall(requestWithToken(url, refreshedToken)).execute()
+                .use { readBody(it) }
         }
-        return response.use { it.body?.string() ?: "" }
+        return response.use { readBody(it) }
     }
 
-    private fun ensureValidToken() {
-        if (Instant.now().isAfter(tokenExpiresAt.minusSeconds(60))) refreshToken()
+    private fun requestWithToken(url: String, accessToken: String) =
+        Request.Builder().url(url).header("Authorization", "Bearer $accessToken").build()
+
+    private fun readBody(response: okhttp3.Response): String {
+        check(response.isSuccessful) { "Spotify API error ${response.code}" }
+        return response.body?.string() ?: error("Empty response body from Spotify")
     }
+
+    private fun validToken(): String = synchronized(tokenLock) {
+        if (tokenNeedsRefresh()) refreshToken()
+        token
+    }
+
+    private fun forceRefreshToken(): String = synchronized(tokenLock) {
+        refreshToken()
+        token
+    }
+
+    private fun tokenNeedsRefresh() = Instant.now().isAfter(tokenExpiresAt.minusSeconds(60))
 
     private fun refreshToken() {
-        val body = FormBody.Builder()
-            .add("grant_type", "client_credentials").build()
+        val body = FormBody.Builder().add("grant_type", "client_credentials").build()
         val request = Request.Builder()
             .url("https://accounts.spotify.com/api/token")
             .header("Authorization", Credentials.basic(clientId, clientSecret))
-            .post(body).build()
-        val responseBody = client.newCall(request).execute().use { it.body?.string() ?: "" }
+            .post(body)
+            .build()
+        val response = client.newCall(request).execute()
+        val responseBody = response.use { res ->
+            check(res.isSuccessful) { "Spotify token endpoint error ${res.code}" }
+            res.body?.string() ?: error("Empty token response from Spotify")
+        }
         val json = JsonParser.parseString(responseBody).asJsonObject
         token = json.get("access_token").asString
-        val expiresIn = json.get("expires_in").asLong
-        tokenExpiresAt = Instant.now().plusSeconds(expiresIn)
+        tokenExpiresAt = Instant.now().plusSeconds(json.get("expires_in").asLong)
     }
 }
