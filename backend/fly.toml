@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for spotifier-delicate-log-1602 on 2026-03-24T11:00:36+01:00
+# fly.toml app configuration file generated for spotifier-delicate on 2026-03-24T11:14:59+01:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'spotifier'
+app = 'spotifier-delicate'
 primary_region = 'arn'
 
 [build]

@@ -14,7 +14,7 @@ android {
         versionCode = 1
         versionName = "2.0.0"
 
-        buildConfigField("String", "BACKEND_BASE_URL", "\"https://spotifier.fly.dev\"")
+        buildConfigField("String", "BACKEND_BASE_URL", "\"https://spotifier-delicate.fly.dev\"")
     }
 
     buildFeatures {
