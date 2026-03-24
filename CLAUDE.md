@@ -76,3 +76,50 @@ GET /resources/spotifier/{googleMusicId}?country=US
 - The backend port defaults to 8080, overridable via `-Dapp.port=<port>`
 - The frontend hardcodes the backend URL (CloudBees deployment)
 - Tests are integration tests — they make real HTTP requests to external APIs
+
+## Code Style: Clean Code Principles
+
+This project follows **Uncle Bob's Clean Code** principles. When writing or modifying code:
+
+### Naming
+
+- **Use intention-revealing names** — Names should answer: why it exists, what it does, how it's used
+- **Avoid encodings** — No Hungarian notation, no prefixes like `m_` or `I` for interfaces
+- **Use pronounceable, searchable names** — `customerAddress` not `custAddr`
+
+### Functions
+
+- **Small** — Functions should be small, then smaller than that
+- **Do one thing** — A function should do one thing, do it well, do it only
+- **One level of abstraction** — Statements within a function should all be at the same level of abstraction
+- **Descriptive names** — A long descriptive name is better than a short enigmatic one
+
+### Comments
+
+- **Don't comment bad code — rewrite it** — Comments are a failure to express yourself in code
+- **Express yourself in code** — Create functions with descriptive names instead of adding comments
+- **Acceptable comments** — Legal comments, explanation of intent, clarification of external APIs, TODOs
+
+### Formatting
+
+- **The newspaper metaphor** — Code should read like a newspaper: headline (class name), synopsis (public functions),
+  details (private functions)
+- **Vertical openness** — Separate concepts with blank lines
+- **Keep related code together** — Caller should be above callee
+
+### Error Handling
+
+- **Use exceptions, not return codes**
+- **Write try-catch-finally first** — Define scope with exceptions
+- **Don't return or pass null** — Consider throwing exceptions or using Kotlin's null-safe types
+
+### Classes
+
+- **Small** — Classes should be small, measured by responsibilities (Single Responsibility Principle)
+- **Organized** — Public functions first, then private functions called by them (step-down rule)
+
+### Tests
+
+- **Clean tests** — Test code is just as important as production code
+- **One assert per test** — Or at least minimize assertions per test
+- **F.I.R.S.T.** — Fast, Independent, Repeatable, Self-validating, Timely
