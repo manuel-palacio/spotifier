@@ -18,7 +18,8 @@ open class SearchService {
         if (query.isBlank()) return null
         val encoded = URLEncoder.encode("$query site:open.spotify.com/track", StandardCharsets.UTF_8)
         val body = fetchSearchResults(encoded)
-        return SPOTIFY_TRACK_REGEX.find(body)?.value
+        val trackId = SPOTIFY_TRACK_REGEX.find(body)?.groupValues?.get(1) ?: return null
+        return "https://open.spotify.com/track/$trackId"
     }
 
     private fun fetchSearchResults(encodedQuery: String): String {
@@ -38,6 +39,6 @@ open class SearchService {
     }
 
     companion object {
-        private val SPOTIFY_TRACK_REGEX = Regex("https://open\\.spotify\\.com/track/[A-Za-z0-9]+")
+        private val SPOTIFY_TRACK_REGEX = Regex("open\\.spotify\\.com(?:/|%2F)track(?:/|%2F)([A-Za-z0-9]+)")
     }
 }
