@@ -8,13 +8,15 @@ import java.util.Collections
 
 private val VIDEO_ID_REGEX = Regex("^[A-Za-z0-9_\\-]{11}$")
 
-private val cache: MutableMap<String, String> = Collections.synchronizedMap(
+private fun spotifyUrlCache(): MutableMap<String, String> = Collections.synchronizedMap(
     object : LinkedHashMap<String, String>(1000, 0.75f, true) {
         override fun removeEldestEntry(eldest: Map.Entry<String, String>) = size > 1000
     }
 )
 
 fun Application.configureRoutes(youtube: YoutubeService, spotify: SpotifyService) {
+    val cache = spotifyUrlCache()
+
     routing {
         get("/health") {
             call.respondText("OK")
