@@ -34,7 +34,7 @@ private fun spotifyUrlCache(): MutableMap<String, String> = Collections.synchron
     }
 )
 
-fun Application.configureRoutes(youtube: YoutubeService, spotify: SpotifyService) {
+fun Application.configureRoutes(youtube: YoutubeService, search: SearchService) {
     val cache = spotifyUrlCache()
 
     routing {
@@ -59,7 +59,7 @@ fun Application.configureRoutes(youtube: YoutubeService, spotify: SpotifyService
             }
 
             try {
-                val spotifyUrl = resolveSpotifyUrl(videoId, youtube, spotify)
+                val spotifyUrl = resolveSpotifyUrl(videoId, youtube, search)
                     ?: run {
                         call.respond(HttpStatusCode.NotFound, "No matching track found on Spotify")
                         return@get
@@ -77,8 +77,8 @@ fun Application.configureRoutes(youtube: YoutubeService, spotify: SpotifyService
 private fun resolveSpotifyUrl(
     videoId: String,
     youtube: YoutubeService,
-    spotify: SpotifyService
+    search: SearchService
 ): String? {
     val (track, artist, rawTitle) = youtube.getTrackAndArtist(videoId)
-    return spotify.findTrackUrl(track, artist, rawTitle)
+    return search.findSpotifyUrl(track, artist, rawTitle)
 }

@@ -13,27 +13,27 @@ class SpotifierRouteTest {
         override fun getTrackAndArtist(videoId: String) = result
     }
 
-    private fun makeSpotify(result: String?) = object : SpotifyService("id", "secret") {
-        override fun findTrackUrl(track: String, artist: String, rawTitle: String) = result
+    private fun makeSearch(result: String?) = object : SearchService() {
+        override fun findSpotifyUrl(track: String, artist: String, rawTitle: String) = result
     }
 
     @Test
     fun `health endpoint returns 200 OK`() = testApplication {
-        application { configureRoutes(makeYoutube(Triple("t", "a", "t")), makeSpotify("url")) }
+        application { configureRoutes(makeYoutube(Triple("t", "a", "t")), makeSearch("url")) }
         val response = client.get("/health")
         assertEquals(HttpStatusCode.OK, response.status)
     }
 
     @Test
     fun `missing videoId returns 400`() = testApplication {
-        application { configureRoutes(makeYoutube(Triple("t", "a", "t")), makeSpotify("url")) }
+        application { configureRoutes(makeYoutube(Triple("t", "a", "t")), makeSearch("url")) }
         val response = client.get("/spotifier")
         assertEquals(HttpStatusCode.BadRequest, response.status)
     }
 
     @Test
     fun `invalid videoId (too short) returns 400`() = testApplication {
-        application { configureRoutes(makeYoutube(Triple("t", "a", "t")), makeSpotify("url")) }
+        application { configureRoutes(makeYoutube(Triple("t", "a", "t")), makeSearch("url")) }
         val response = client.get("/spotifier?videoId=short")
         assertEquals(HttpStatusCode.BadRequest, response.status)
     }
@@ -44,7 +44,7 @@ class SpotifierRouteTest {
         application {
             configureRoutes(
                 makeYoutube(Triple("Blinding Lights", "The Weeknd", "Blinding Lights \u2013 The Weeknd")),
-                makeSpotify(expected)
+                makeSearch(expected)
             )
         }
         val response = client.get("/spotifier?videoId=4NRXx6U8ABQ")
@@ -53,8 +53,8 @@ class SpotifierRouteTest {
     }
 
     @Test
-    fun `spotify not found returns 404`() = testApplication {
-        application { configureRoutes(makeYoutube(Triple("t", "a", "t")), makeSpotify(null)) }
+    fun `search not found returns 404`() = testApplication {
+        application { configureRoutes(makeYoutube(Triple("t", "a", "t")), makeSearch(null)) }
         val response = client.get("/spotifier?videoId=4NRXx6U8ABQ")
         assertEquals(HttpStatusCode.NotFound, response.status)
     }
@@ -64,7 +64,7 @@ class SpotifierRouteTest {
         val failingYoutube = object : YoutubeService("fake-key") {
             override fun getTrackAndArtist(videoId: String): Triple<String, String, String> = error("API error")
         }
-        application { configureRoutes(failingYoutube, makeSpotify("url")) }
+        application { configureRoutes(failingYoutube, makeSearch("url")) }
         val response = client.get("/spotifier?videoId=4NRXx6U8ABQ")
         assertEquals(HttpStatusCode.BadGateway, response.status)
     }
