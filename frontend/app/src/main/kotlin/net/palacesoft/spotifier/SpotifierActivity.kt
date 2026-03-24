@@ -7,6 +7,7 @@ import android.widget.Toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -31,6 +32,11 @@ class SpotifierActivity : Activity() {
             .addConverterFactory(ScalarsConverterFactory.create())
             .build()
             .create(SpotifierApi::class.java)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        scope.cancel()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
