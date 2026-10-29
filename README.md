@@ -30,8 +30,6 @@ computer.
 If the track can't be matched you get a "Song not found on Spotify" message. Only `music.youtube.com/watch?v=...`
 links are supported.
 
-The first share after a period of inactivity can take a few extra seconds while the server wakes up.
-
 ## Calling the API directly
 
 Take the `v=` value from a YouTube Music link (`https://music.youtube.com/watch?v=VIDEO_ID`) and request:
@@ -47,6 +45,7 @@ The response is the Spotify track URL as plain text.
 | 200    | Spotify track URL in the body            |
 | 400    | Missing or malformed `videoId`           |
 | 404    | No matching track found on Spotify       |
+| 429    | Too many lookups — try again in a minute |
 | 502    | YouTube or search lookup failed          |
 
 ## Installing the app

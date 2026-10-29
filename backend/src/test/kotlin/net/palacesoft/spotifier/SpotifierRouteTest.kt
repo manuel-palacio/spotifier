@@ -111,6 +111,52 @@ class SpotifierRouteTest {
     }
 
     @Test
+    fun `lookups beyond the per-visitor limit return 429`() = testApplication {
+        application { configureRoutes(makeYoutube(Triple("t", "a", "t")), makeSearch("url")) }
+        val statuses = (1..11).map { lookUpFrom("1.1.1.1").status }
+        assertEquals(HttpStatusCode.TooManyRequests, statuses.last())
+    }
+
+    @Test
+    fun `lookups within the per-visitor limit succeed`() = testApplication {
+        application { configureRoutes(makeYoutube(Triple("t", "a", "t")), makeSearch("url")) }
+        val statuses = (1..10).map { lookUpFrom("1.1.1.1").status }
+        assertEquals(List(10) { HttpStatusCode.OK }, statuses)
+    }
+
+    @Test
+    fun `per-visitor limit is counted separately for each visitor`() = testApplication {
+        application { configureRoutes(makeYoutube(Triple("t", "a", "t")), makeSearch("url")) }
+        repeat(11) { lookUpFrom("1.1.1.1") }
+        assertEquals(HttpStatusCode.OK, lookUpFrom("2.2.2.2").status)
+    }
+
+    @Test
+    fun `lookups beyond the overall hourly limit return 429`() = testApplication {
+        application { configureRoutes(makeYoutube(Triple("t", "a", "t")), makeSearch("url")) }
+        val statuses = (1..301).map { lookUpFrom("10.0.${it / 10}.${it % 10}").status }
+        assertEquals(HttpStatusCode.TooManyRequests, statuses.last())
+    }
+
+    @Test
+    fun `lookups within the overall hourly limit succeed`() = testApplication {
+        application { configureRoutes(makeYoutube(Triple("t", "a", "t")), makeSearch("url")) }
+        val statuses = (1..300).map { lookUpFrom("10.0.${it / 10}.${it % 10}").status }
+        assertTrue(statuses.all { it == HttpStatusCode.OK })
+    }
+
+    @Test
+    fun `lookup page is not rate limited`() = testApplication {
+        application { configureRoutes(makeYoutube(Triple("t", "a", "t")), makeSearch("url")) }
+        repeat(11) { lookUpFrom("1.1.1.1") }
+        val response = client.get("/") { header("Fly-Client-IP", "1.1.1.1") }
+        assertEquals(HttpStatusCode.OK, response.status)
+    }
+
+    private suspend fun ApplicationTestBuilder.lookUpFrom(clientIp: String) =
+        client.get("/spotifier?videoId=4NRXx6U8ABQ") { header("Fly-Client-IP", clientIp) }
+
+    @Test
     fun `youtube error returns 502`() = testApplication {
         val failingYoutube = object : YoutubeService("fake-key") {
             override fun getTrackAndArtist(videoId: String): Triple<String, String, String> = error("API error")

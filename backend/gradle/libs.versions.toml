@@ -9,6 +9,7 @@ junit = "5.10.2"
 [libraries]
 ktor-server-netty         = { module = "io.ktor:ktor-server-netty",          version.ref = "ktor" }
 ktor-server-core          = { module = "io.ktor:ktor-server-core",           version.ref = "ktor" }
+ktor-server-rate-limit    = { module = "io.ktor:ktor-server-rate-limit",     version.ref = "ktor" }
 ktor-server-content-nego  = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor" }
 ktor-serialization-gson   = { module = "io.ktor:ktor-serialization-gson",    version.ref = "ktor" }
 ktor-server-test-host     = { module = "io.ktor:ktor-server-test-host",      version.ref = "ktor" }
