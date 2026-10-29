@@ -83,7 +83,7 @@ Other endpoints: `GET /` (installable lookup web app: `backend/src/main/resource
 
 - Backend env vars: `YOUTUBE_API_KEY` (required), `PORT` (default 8080)
 - The frontend's backend URL is the `BACKEND_BASE_URL` BuildConfig field in `frontend/app/build.gradle.kts` (`https://spotifier-delicate.fly.dev`)
-- fly.io stops idle machines, so the first request after idle is a slow cold start
+- fly.io keeps one machine always running (`min_machines_running = 1`, autostop off) — scaling to zero caused slow or failed wake-ups
 - Tests are unit tests with stubbed services — nothing hits YouTube or DuckDuckGo. The DuckDuckGo scraping can break if its HTML changes
 - The design docs in `docs/superpowers/` describe the original Spotify Web API approach, which was later replaced with DuckDuckGo search
 
