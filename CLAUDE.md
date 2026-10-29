@@ -60,7 +60,7 @@ GET /spotifier?videoId=XXXXXXXXXXX
       → 200 Spotify URL (plain text) | 404 not found | 502 upstream error
 ```
 
-Other endpoints: `GET /health` (fly.io health check), `GET /privacy` (privacy policy page for the Play Store).
+Other endpoints: `GET /` (installable lookup web app: `backend/src/main/resources/static/` — page, manifest with share target, service worker, icons), `GET /health` (fly.io health check), `GET /privacy` (privacy policy page for the Play Store).
 
 **Key files:**
 - `backend/src/main/kotlin/net/palacesoft/spotifier/Application.kt` — entry point, reads env vars, starts Netty

@@ -2,6 +2,7 @@ package net.palacesoft.spotifier
 
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.http.content.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import java.util.Collections
@@ -40,6 +41,8 @@ fun Application.configureRoutes(youtube: YoutubeService, search: SearchService) 
     val cache = spotifyUrlCache()
 
     routing {
+        staticResources("/", "static")
+
         get("/health") {
             call.respondText("OK")
         }

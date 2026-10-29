@@ -7,7 +7,20 @@ You're listening to something in YouTube Music and want to send it to a friend w
 Spotifier, and it finds the same track on Spotify and opens the share sheet with the Spotify link, ready to
 send via WhatsApp, Telegram, etc.
 
-## Using it on your phone (Android)
+## Using it from any browser
+
+Open **https://spotifier-delicate.fly.dev/**, paste a YouTube Music link (or just the video ID) and tap
+**Find on Spotify**. You can then copy the Spotify link, share it, or open it in Spotify. Works on any phone or
+computer.
+
+### Install it on your phone
+
+- **Android (Chrome):** open the page, tap **⋮ → Add to Home screen → Install**. Spotifier then also shows up in
+  the share menu: in YouTube Music tap **Share → Spotifier** and the lookup starts by itself.
+- **iPhone (Safari):** open the page, tap **Share → Add to Home Screen**. iOS doesn't let web apps appear in the
+  share menu, so copy the link in YouTube Music and paste it into Spotifier.
+
+## Using it on your phone (Android app)
 
 1. Install the app (see [Installing the app](#installing-the-app)).
 2. In YouTube Music, open a track and tap **Share**.
@@ -19,10 +32,9 @@ links are supported.
 
 The first share after a period of inactivity can take a few extra seconds while the server wakes up.
 
-## Using it without the app
+## Calling the API directly
 
-The backend is a plain HTTP API, so any device with a browser can use it. Take the `v=` value from a YouTube
-Music link (`https://music.youtube.com/watch?v=VIDEO_ID`) and open:
+Take the `v=` value from a YouTube Music link (`https://music.youtube.com/watch?v=VIDEO_ID`) and request:
 
 ```
 https://spotifier-delicate.fly.dev/spotifier?videoId=VIDEO_ID
