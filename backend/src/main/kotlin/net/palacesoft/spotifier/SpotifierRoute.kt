@@ -20,7 +20,9 @@ private val PRIVACY_POLICY = """
     The YouTube Music video ID from the shared link is sent to this server solely to look up
     the matching Spotify track. It is not logged or retained.</p>
     <h2>Third-party services</h2>
-    <p>Track lookups use the YouTube Data API and the Spotify Web API.
+    <p>Track lookups use the YouTube Data API to read the track title and artist,
+    and DuckDuckGo search to find the matching Spotify link. Only the video ID is sent
+    to YouTube, and only the track title and artist are sent to DuckDuckGo.
     Their respective privacy policies apply.</p>
     <h2>Contact</h2>
     <p>Questions? Open an issue on the project repository.</p>
